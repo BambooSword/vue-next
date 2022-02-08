@@ -631,6 +631,7 @@ function baseCreateRenderer(
       // only do this in production since cloned trees cannot be HMR updated.
       el = vnode.el = hostCloneNode(vnode.el)
     } else {
+      // hostCreateElement创建dom元素
       el = vnode.el = hostCreateElement(
         vnode.type as string,
         isSVG,
@@ -643,6 +644,7 @@ function baseCreateRenderer(
       if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
         hostSetElementText(el, vnode.children as string)
       } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+        // 递归children
         mountChildren(
           vnode.children as VNodeArrayChildren,
           el,
@@ -779,6 +781,7 @@ function baseCreateRenderer(
     optimized,
     start = 0
   ) => {
+    // 循环patch
     for (let i = start; i < children.length; i++) {
       const child = (children[i] = optimized
         ? cloneIfMounted(children[i] as VNode)
@@ -1223,6 +1226,7 @@ function baseCreateRenderer(
       if (__DEV__) {
         startMeasure(instance, `init`)
       }
+      // 组件的初始化
       setupComponent(instance)
       if (__DEV__) {
         endMeasure(instance, `init`)
@@ -1242,7 +1246,7 @@ function baseCreateRenderer(
       }
       return
     }
-
+    // 执行副作用，在setupComponent时已经确保有了render函数
     setupRenderEffect(
       instance,
       initialVNode,
@@ -1370,6 +1374,7 @@ function baseCreateRenderer(
           if (__DEV__) {
             startMeasure(instance, `render`)
           }
+          // 渲染函数的执行过程，subTree为当前组件的子树，vnode
           const subTree = (instance.subTree = renderComponentRoot(instance))
           if (__DEV__) {
             endMeasure(instance, `render`)
@@ -1377,6 +1382,7 @@ function baseCreateRenderer(
           if (__DEV__) {
             startMeasure(instance, `patch`)
           }
+          // patch递归遍历vnode
           patch(
             null,
             subTree,
@@ -2300,12 +2306,16 @@ function baseCreateRenderer(
     return hostNextSibling((vnode.anchor || vnode.el)!)
   }
 
+  // 把虚拟dom转化为真实dom
   const render: RootRenderFunction = (vnode, container, isSVG) => {
     if (vnode == null) {
       if (container._vnode) {
         unmount(container._vnode, null, null, true)
       }
     } else {
+      // 由于传入第一个参数为null
+      // 首次patch过程是挂载，而不是更新
+      // 会将 vnode -> rnode, 然后挂载到container容器中
       patch(container._vnode || null, vnode, container, null, null, null, isSVG)
     }
     flushPostFlushCbs()
@@ -2332,11 +2342,11 @@ function baseCreateRenderer(
       internals as RendererInternals<Node, Element>
     )
   }
-
+  // 返回值
   return {
-    render,
+    render, // 把虚拟dom转化为真实dom
     hydrate,
-    createApp: createAppAPI(render, hydrate)
+    createApp: createAppAPI(render, hydrate) // 创建实例方法
   }
 }
 

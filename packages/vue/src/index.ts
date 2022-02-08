@@ -31,7 +31,7 @@ function compileToFunction(
   if (cached) {
     return cached
   }
-
+  // mount传入的参数是以 #开头
   if (template[0] === '#') {
     const el = document.querySelector(template)
     if (__DEV__ && !el) {
@@ -44,6 +44,7 @@ function compileToFunction(
     template = el ? el.innerHTML : ``
   }
 
+  // 模板字符串需要编译，最终得到一个render函数
   const { code } = compile(
     template,
     extend(
